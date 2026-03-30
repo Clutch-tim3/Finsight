@@ -1,0 +1,119 @@
+@baseUrl = http://localhost:3000
+
+### Health Check
+GET {{baseUrl}}/v1/health
+X-RapidAPI-Key: test-key-12345
+
+### Upload Document
+POST {{baseUrl}}/v1/documents/upload
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+X-RapidAPI-Key: test-key-12345
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="document_type"
+
+bank_statement
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="currency_hint"
+
+ZAR
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="business_name"
+
+Prodigy Sports Platform (Pty) Ltd
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="text"
+
+Sample bank statement text containing transactions...
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Get Ratios
+POST {{baseUrl}}/v1/documents/clx9k2.../ratios
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{
+  "industry": "professional_services",
+  "size_band": "medium",
+  "include_interpretations": true,
+  "include_benchmarks": true,
+  "include_trends": true
+}
+
+### Get Health Score
+POST {{baseUrl}}/v1/documents/clx9k2.../health-score
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{}
+
+### Get Creditworthiness
+POST {{baseUrl}}/v1/documents/clx9k2.../creditworthiness
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{
+  "loan_purpose": "working_capital",
+  "loan_amount_requested": 500000,
+  "loan_currency": "ZAR",
+  "loan_term_months": 24,
+  "estimated_monthly_repayment": 25000
+}
+
+### Get Commentary
+POST {{baseUrl}}/v1/documents/clx9k2.../commentary
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{
+  "style": "accountant_report",
+  "tone": "professional",
+  "word_count": "standard",
+  "include_recommendations": true,
+  "audience": "bank",
+  "business_name": "Prodigy Sports Platform (Pty) Ltd",
+  "period_label": "Q1 2025"
+}
+
+### Get Cash Flow Analysis
+POST {{baseUrl}}/v1/documents/clx9k2.../cashflow
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{
+  "runway_calculation": true,
+  "include_seasonality": true,
+  "include_forecast": true,
+  "forecast_months": 3,
+  "exclude_transfer_transactions": true
+}
+
+### Get Revenue Analysis
+POST {{baseUrl}}/v1/documents/clx9k2.../revenue
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{
+  "classify_revenue_type": true,
+  "include_customer_concentration": true,
+  "benchmark_growth": true
+}
+
+### Get Anomaly Detection
+POST {{baseUrl}}/v1/documents/clx9k2.../anomalies
+Content-Type: application/json
+X-RapidAPI-Key: test-key-12345
+
+{
+  "sensitivity": "medium",
+  "focus": "credit_risk",
+  "context": "lending_decision"
+}
+
+### Get Document
+GET {{baseUrl}}/v1/documents/clx9k2...
+X-RapidAPI-Key: test-key-12345
+
+### Delete Document
+DELETE {{baseUrl}}/v1/documents/clx9k2...
+X-RapidAPI-Key: test-key-12345

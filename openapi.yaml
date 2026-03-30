@@ -1,0 +1,624 @@
+openapi: 3.0.0
+info:
+  title: FinSightIQ API
+  version: 1.0.0
+  description: AI-driven business financial intelligence API. Upload any bank statement, management accounts, or financials — get ratios, cash flow analysis, anomaly detection, creditworthiness assessment and lending reports.
+  contact:
+    name: FinSightIQ Support
+    email: support@finsightiq.com
+
+servers:
+  - url: https://api.finsightiq.com/v1
+    description: Production server
+  - url: http://localhost:3000/v1
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Health check and service status
+      description: Returns the current status of the API and its dependencies.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /documents/upload:
+    post:
+      summary: Upload and parse financial document
+      description: Upload a financial document for parsing. Supports PDF, Excel, CSV, JSON, and raw text formats.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: File to upload (PDF, Excel, CSV, or image)
+                text:
+                  type: string
+                  description: Raw financial text content
+                json_data:
+                  type: string
+                  description: Pre-structured JSON financial data
+                document_type:
+                  type: string
+                  enum: [bank_statement, management_accounts, income_statement, balance_sheet, auto]
+                  default: auto
+                  description: Type of document being uploaded
+                currency_hint:
+                  type: string
+                  description: ISO 4217 currency code hint
+                period_hint:
+                  type: string
+                  description: Period covered in format YYYY-MM-DD/YYYY-MM-DD
+                business_name:
+                  type: string
+                  description: Name of the business
+      responses:
+        '200':
+          description: Document uploaded and parsed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentUploadResponse'
+
+  /documents/{document_id}:
+    get:
+      summary: Get document metadata and status
+      description: Returns metadata and status of a uploaded document.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document metadata retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+    delete:
+      summary: Delete document and all analyses
+      description: Deletes a document and all associated analyses.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /documents/{document_id}/ratios:
+    post:
+      summary: Calculate financial ratios
+      description: Calculate all standard financial ratios from the uploaded document.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                industry:
+                  type: string
+                  description: Industry classification for benchmarking
+                size_band:
+                  type: string
+                  enum: [micro, small, medium, auto]
+                  default: auto
+                  description: Business size band
+                include_interpretations:
+                  type: boolean
+                  default: true
+                  description: Include ratio interpretations
+                include_benchmarks:
+                  type: boolean
+                  default: true
+                  description: Include industry benchmarks
+                include_trends:
+                  type: boolean
+                  default: true
+                  description: Include trend analysis
+      responses:
+        '200':
+          description: Ratios calculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatiosResponse'
+
+  /documents/{document_id}/health-score:
+    post:
+      summary: Get composite health score
+      description: Calculate a composite financial health score (0-100) with methodology transparency.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Health score calculated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthScoreResponse'
+
+  /documents/{document_id}/creditworthiness:
+    post:
+      summary: Creditworthiness assessment
+      description: Assess the creditworthiness of a business for lending decisions.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                loan_purpose:
+                  type: string
+                  enum: [working_capital, asset_finance, invoice_finance, merchant_cash_advance, term_loan, overdraft, general]
+                loan_amount_requested:
+                  type: number
+                loan_currency:
+                  type: string
+                loan_term_months:
+                  type: integer
+                estimated_monthly_repayment:
+                  type: number
+                include_dscr:
+                  type: boolean
+                  default: true
+                include_affordability:
+                  type: boolean
+                  default: true
+                include_risk_grade:
+                  type: boolean
+                  default: true
+                lender_context:
+                  type: string
+      responses:
+        '200':
+          description: Creditworthiness assessment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditworthinessResponse'
+
+  /documents/{document_id}/commentary:
+    post:
+      summary: Generate financial commentary
+      description: Generate professional financial commentary in multiple styles.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                style:
+                  type: string
+                  enum: [accountant_report, investor_update, board_pack, credit_memo, management_summary, plain_english]
+                  default: management_summary
+                tone:
+                  type: string
+                  enum: [formal, professional, conversational]
+                  default: professional
+                word_count:
+                  type: string
+                  enum: [brief, standard, detailed]
+                  default: standard
+                include_recommendations:
+                  type: boolean
+                  default: true
+                audience:
+                  type: string
+                  enum: [cfo, ceo, board, bank, investor, general]
+                business_name:
+                  type: string
+                period_label:
+                  type: string
+      responses:
+        '200':
+          description: Commentary generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentaryResponse'
+
+  /documents/{document_id}/cashflow:
+    post:
+      summary: Cash flow analysis
+      description: Analyze cash flow patterns, runway, and forecasting.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                runway_calculation:
+                  type: boolean
+                  default: true
+                include_seasonality:
+                  type: boolean
+                  default: true
+                include_forecast:
+                  type: boolean
+                  default: true
+                forecast_months:
+                  type: integer
+                  default: 3
+                exclude_transfer_transactions:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Cash flow analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashFlowResponse'
+
+  /documents/{document_id}/revenue:
+    post:
+      summary: Revenue trend analysis
+      description: Analyze revenue patterns, growth, and quality.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                classify_revenue_type:
+                  type: boolean
+                  default: true
+                include_customer_concentration:
+                  type: boolean
+                  default: true
+                benchmark_growth:
+                  type: boolean
+                  default: true
+      responses:
+        '200':
+          description: Revenue analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevenueResponse'
+
+  /documents/{document_id}/anomalies:
+    post:
+      summary: Anomaly and red flag detection
+      description: Detect anomalies and red flags in financial data.
+      parameters:
+        - name: document_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sensitivity:
+                  type: string
+                  enum: [low, medium, high]
+                  default: medium
+                focus:
+                  type: string
+                  enum: [all, fraud_risk, credit_risk, operational]
+                  default: all
+                context:
+                  type: string
+                  enum: [lending_decision, audit, due_diligence, general]
+                  default: general
+      responses:
+        '200':
+          description: Anomaly detection completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyResponse'
+
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        data:
+          type: object
+        meta:
+          type: object
+          properties:
+            request_id:
+              type: string
+            version:
+              type: string
+            processing_ms:
+              type: integer
+            from_cache:
+              type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: string
+
+    DocumentUploadResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                document_id:
+                  type: string
+                source_format:
+                  type: string
+                filename:
+                  type: string
+                pages:
+                  type: integer
+                detected_metadata:
+                  type: object
+                extraction_confidence:
+                  type: string
+                extraction_warnings:
+                  type: array
+                  items:
+                    type: string
+                available_analyses:
+                  type: array
+                  items:
+                    type: string
+                expires_at:
+                  type: string
+
+    RatiosResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                document_id:
+                  type: string
+                analysis_id:
+                  type: string
+                document_type:
+                  type: string
+                period:
+                  type: string
+                currency:
+                  type: string
+                ratios:
+                  type: object
+                ratio_summary:
+                  type: object
+
+    HealthScoreResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                health_score:
+                  type: integer
+                health_label:
+                  type: string
+                health_rating:
+                  type: string
+                score_breakdown:
+                  type: object
+                score_interpretation:
+                  type: string
+                top_3_improvements:
+                  type: array
+                  items:
+                    type: object
+
+    CreditworthinessResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                overall_credit_grade:
+                  type: string
+                grade_description:
+                  type: string
+                credit_score:
+                  type: integer
+                lending_recommendation:
+                  type: string
+                five_c_assessment:
+                  type: object
+                key_strengths:
+                  type: array
+                  items:
+                    type: string
+                key_risks:
+                  type: array
+                  items:
+                    type: string
+
+    CommentaryResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                commentary:
+                  type: object
+                  properties:
+                    style:
+                      type: string
+                    period:
+                      type: string
+                    word_count:
+                      type: integer
+                    headline:
+                      type: string
+                    body:
+                      type: string
+                    key_metrics_table:
+                      type: array
+                      items:
+                        type: object
+
+    CashFlowResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                cashflow_summary:
+                  type: object
+                monthly_breakdown:
+                  type: array
+                  items:
+                    type: object
+                cash_flow_quality:
+                  type: object
+                inflow_analysis:
+                  type: object
+                outflow_analysis:
+                  type: object
+                runway:
+                  type: object
+                seasonality:
+                  type: object
+                forecast:
+                  type: object
+
+    RevenueResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                revenue_summary:
+                  type: object
+                revenue_quality:
+                  type: object
+                anomalies:
+                  type: array
+                  items:
+                    type: object
+
+    AnomalyResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                overall_anomaly_risk:
+                  type: string
+                risk_score:
+                  type: integer
+                total_flags:
+                  type: integer
+                flags:
+                  type: array
+                  items:
+                    type: object
+                clean_indicators:
+                  type: array
+                  items:
+                    type: string
+                fraud_risk_indicators:
+                  type: object
+
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-RapidAPI-Key
+      description: Your RapidAPI key
+
+security:
+  - apiKeyAuth: []
+
+tags:
+  - name: health
+    description: Health and status endpoints
+  - name: documents
+    description: Document management endpoints
+  - name: analyses
+    description: Analysis endpoints
+  - name: financial
+    description: Financial analysis endpoints

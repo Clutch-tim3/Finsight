@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model FinancialDocument {
+  id                    String    @id @default(cuid())
+  source_format         String
+  filename              String?
+  file_size_bytes       Int?
+  business_name         String?
+  bank_name             String?
+  currency              String?
+  period_start          DateTime?
+  period_end            DateTime?
+  period_months         Int?
+  parsed_data           Json?
+  extraction_confidence String?
+  extraction_warnings   Json?
+  expires_at            DateTime?
+  analyses              Analysis[]
+  createdAt             DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([business_name])
+}
+
+model Analysis {
+  id              String    @id @default(cuid())
+  document_id     String
+  document        FinancialDocument @relation(fields: [document_id], references: [id], onDelete: Cascade)
+  analysis_type   String
+  input_hash      String
+  result          Json
+  model_used      String    @default("claude-sonnet-4-20250514")
+  tokens_input    Int?
+  tokens_output   Int?
+  duration_ms     Int?
+  from_cache      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  @@unique([input_hash])
+  @@index([document_id, analysis_type])
+}
+
+model IndustryBenchmark {
+  id                    String    @id @default(cuid())
+  industry              String
+  sub_industry          String?
+  country               String    @default("global")
+  size_band             String
+  gross_margin_median   Float?
+  ebitda_margin_median  Float?
+  net_margin_median     Float?
+  current_ratio_median  Float?
+  quick_ratio_median    Float?
+  debt_to_equity_median Float?
+  debtor_days_median    Float?
+  creditor_days_median  Float?
+  inventory_days_median Float?
+  asset_turnover_median Float?
+  revenue_growth_median Float?
+  data_source           String
+  last_updated          DateTime  @default(now())
+
+  @@index([industry, country, size_band])
+  @@unique([industry, sub_industry, country, size_band])
+}
+
+model BatchJob {
+  id              String    @id @default(cuid())
+  status          String    @default("queued")
+  total           Int
+  processed       Int       @default(0)
+  failed          Int       @default(0)
+  analysis_types  String[]
+  options         Json?
+  results         Json?
+  webhook_url     String?
+  webhook_fired   Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+}
+
+model ApiUsage {
+  id              String    @id @default(cuid())
+  api_key_hash    String
+  tier            String
+  endpoint        String
+  request_weight  Int       @default(1)
+  response_status Int
+  duration_ms     Int
+  tokens_used     Int?
+  from_cache      Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+
+  @@index([api_key_hash, createdAt])
+}
