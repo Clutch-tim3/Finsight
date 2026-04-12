@@ -16,12 +16,8 @@ env:
   # Secrets — set these via:
   # firebase apphosting:secrets:set DATABASE_URL
   # firebase apphosting:secrets:set ANTHROPIC_API_KEY
-  # firebase apphosting:secrets:set REDIS_URL  (optional)
   - variable: DATABASE_URL
     secret: DATABASE_URL
 
   - variable: ANTHROPIC_API_KEY
     secret: ANTHROPIC_API_KEY
-
-  - variable: REDIS_URL
-    secret: REDIS_URL
