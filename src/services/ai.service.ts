@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import crypto from 'crypto';
-import redis from '../config/redis';
+import { cache } from '../lib/cache';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -13,7 +13,7 @@ export class AIService {
     const cacheKey = crypto.createHash('sha256').update(prompt + temperature + maxTokens).digest('hex');
     
     // Check cache
-    const cachedResponse = await redis.get(`ai_cache:${cacheKey}`);
+    const cachedResponse = await cache.get(`ai_cache:${cacheKey}`);
     if (cachedResponse) {
       return cachedResponse;
     }
@@ -34,7 +34,7 @@ export class AIService {
       const response = message.content[0].type === 'text' ? message.content[0].text : '';
       
       // Cache the response
-      await redis.setex(`ai_cache:${cacheKey}`, CACHE_TTL, response);
+      await cache.set(`ai_cache:${cacheKey}`, response, CACHE_TTL);
       
       return response;
     } catch (error) {

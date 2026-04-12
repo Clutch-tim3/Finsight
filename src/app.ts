@@ -83,7 +83,7 @@ app.use('/v1/documents', analysesRoutes);
 app.use('/v1/health', healthRoutes);
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     success: true,
     message: 'FinSightIQ API is running',
@@ -99,7 +99,7 @@ app.get('/', (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: any, req: any, res: any, next: any) => {
+app.use((error: any, _req: any, res: any, _next: any) => {
   console.error('API Error:', error);
   
   const statusCode = error.statusCode || 500;

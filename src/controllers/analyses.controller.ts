@@ -9,7 +9,7 @@ export class AnalysesController {
   static async getRatios(req: Request, res: Response) {
     try {
       const { document_id } = req.params;
-      const { industry = 'auto', size_band = 'auto', include_interpretations = true, include_benchmarks = true, include_trends = true } = req.body;
+      const { industry = 'auto', include_interpretations = true } = req.body;
       
       // Mock financial data (would be extracted from document in real implementation)
       const mockIncomeStatement = {
@@ -126,7 +126,7 @@ export class AnalysesController {
         error: {
           code: 'RATIO_CALCULATION_FAILED',
           message: 'Failed to calculate financial ratios',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -191,7 +191,7 @@ export class AnalysesController {
         error: {
           code: 'HEALTH_SCORE_FAILED',
           message: 'Failed to calculate health score',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -265,7 +265,7 @@ export class AnalysesController {
         error: {
           code: 'CREDITWORTHINESS_FAILED',
           message: 'Failed to assess creditworthiness',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -337,7 +337,7 @@ export class AnalysesController {
         error: {
           code: 'COMMENTARY_FAILED',
           message: 'Failed to generate commentary',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -428,7 +428,7 @@ export class AnalysesController {
         error: {
           code: 'CASHFLOW_ANALYSIS_FAILED',
           message: 'Failed to analyze cash flow',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -437,12 +437,11 @@ export class AnalysesController {
   static async getRevenueAnalysis(req: Request, res: Response) {
     try {
       const { document_id } = req.params;
-      const options = req.body;
-      
+
       // Mock transactions data
       const mockTransactions = [];
       const startDate = new Date(2025, 0, 1);
-      
+
       for (let i = 0; i < 80; i++) {
         const date = new Date(startDate);
         date.setDate(startDate.getDate() + i);
@@ -507,7 +506,7 @@ export class AnalysesController {
         error: {
           code: 'REVENUE_ANALYSIS_FAILED',
           message: 'Failed to analyze revenue',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -516,7 +515,7 @@ export class AnalysesController {
   static async getAnomalyDetection(req: Request, res: Response) {
     try {
       const { document_id } = req.params;
-      const { sensitivity = 'medium', focus = 'all', context = 'general' } = req.body;
+      const { sensitivity = 'medium', context = 'general' } = req.body;
       
       // Mock data
       const mockData = {
@@ -598,7 +597,7 @@ export class AnalysesController {
         error: {
           code: 'ANOMALY_DETECTION_FAILED',
           message: 'Failed to detect anomalies',
-          details: error.message
+          details: (error as any).message
         }
       });
     }

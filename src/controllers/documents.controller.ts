@@ -6,7 +6,7 @@ import { ParsedFinancials } from '../types/financials.types';
 export class DocumentsController {
   static async uploadDocument(req: Request, res: Response) {
     try {
-      const { text, json_data, document_type = 'auto', currency_hint, period_hint, business_name } = req.body;
+      const { text, json_data, document_type = 'auto', currency_hint, business_name } = req.body;
       const file = req.file;
       
       let sourceFormat: string;
@@ -24,13 +24,14 @@ export class DocumentsController {
         sourceFormat = 'raw_text';
         rawText = text;
       } else {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           error: {
             code: 'MISSING_INPUT',
             message: 'Either a file, text, or JSON data is required'
           }
         });
+        return;
       }
       
       // Create document record
@@ -135,7 +136,7 @@ export class DocumentsController {
         error: {
           code: 'UPLOAD_FAILED',
           message: 'Failed to upload and parse document',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -148,13 +149,14 @@ export class DocumentsController {
       const document = await DocumentService.getDocument(document_id);
       
       if (!document) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           error: {
             code: 'DOCUMENT_NOT_FOUND',
             message: 'Document not found'
           }
         });
+        return;
       }
       
       res.json({
@@ -185,7 +187,7 @@ export class DocumentsController {
         error: {
           code: 'GET_DOCUMENT_FAILED',
           message: 'Failed to retrieve document',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
@@ -209,13 +211,13 @@ export class DocumentsController {
         error: {
           code: 'DELETE_DOCUMENT_FAILED',
           message: 'Failed to delete document',
-          details: error.message
+          details: (error as any).message
         }
       });
     }
   }
   
-  private static determineSourceFormat(filename: string, mimeType: string): string {
+  private static determineSourceFormat(filename: string, _mimeType: string): string {
     const ext = filename.split('.').pop()?.toLowerCase();
     
     if (['pdf'].includes(ext || '')) {

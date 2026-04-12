@@ -1,4 +1,25 @@
-export const COMMENTARY_PROMPT = `You are a senior financial analyst writing a professional financial commentary. Please analyze the provided financial data and write a ${wordCount} commentary in ${style} style with ${tone} tone.
+interface CommentaryOptions {
+  wordCount?: string | number;
+  style?: string;
+  tone?: string;
+  audience?: string;
+  businessName?: string;
+  periodLabel?: string;
+  includeRecommendations?: boolean;
+}
+
+export const buildCommentaryPrompt = (financialData: unknown, options: CommentaryOptions = {}): string => {
+  const {
+    wordCount = 'standard',
+    style = 'management_summary',
+    tone = 'professional',
+    audience = 'management',
+    businessName = 'The business',
+    periodLabel = 'the period',
+    includeRecommendations = true,
+  } = options;
+
+  return `You are a senior financial analyst writing a professional financial commentary. Please analyze the provided financial data and write a ${wordCount} commentary in ${style} style with ${tone} tone.
 
 Audience: ${audience}
 Business Name: ${businessName}
@@ -25,3 +46,4 @@ Structure the response in JSON format with:
 - "key_metrics_table": array of { "metric": string, "value": string }
 
 Do not include any other formatting.`;
+};

@@ -14,7 +14,6 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   try {
     const apiKeyHash = (req as any).apiKeyHash;
     const tier = (req as any).tier || 'FREE';
-    const endpoint = req.path;
     
     const windowStart = new Date(Date.now() - WINDOW_SIZE_IN_HOURS * 60 * 60 * 1000);
     const cacheKey = `rate_limit:${apiKeyHash}:${windowStart.toISOString().split('T')[0]}`;
@@ -25,10 +24,10 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
       requestsCount = '0';
     }
     
-    const maxRequests = REQUESTS_PER_WINDOW[tier];
-    
+    const maxRequests = REQUESTS_PER_WINDOW[tier as keyof typeof REQUESTS_PER_WINDOW] ?? REQUESTS_PER_WINDOW['FREE'];
+
     if (parseInt(requestsCount) >= maxRequests) {
-      return res.status(429).json({
+      res.status(429).json({
         success: false,
         error: {
           code: 'RATE_LIMIT_EXCEEDED',
@@ -36,6 +35,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
           retry_after: WINDOW_SIZE_IN_HOURS * 3600
         }
       });
+      return;
     }
     
     await redis.incr(cacheKey);

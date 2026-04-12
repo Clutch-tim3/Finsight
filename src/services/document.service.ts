@@ -1,6 +1,4 @@
 import prisma from '../config/database';
-import { ParsedFinancials } from '../types/financials.types';
-import { AIService } from './ai.service';
 
 export class DocumentService {
   static async createDocument(sourceFormat: string, filename?: string, fileSize?: number): Promise<string> {
@@ -74,7 +72,7 @@ export class DocumentService {
       });
     } catch (error) {
       // If duplicate key, update existing analysis
-      if (error.code === 'P2002') {
+      if ((error as any).code === 'P2002') {
         return await prisma.analysis.update({
           where: { input_hash: inputHash },
           data: {

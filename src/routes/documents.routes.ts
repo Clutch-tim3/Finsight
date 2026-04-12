@@ -8,7 +8,7 @@ const upload = multer({
   limits: {
     fileSize: 30 * 1024 * 1024 // 30MB limit
   },
-  fileFilter: (req, file, cb) => {
+  fileFilter: (_req, file, cb) => {
     const allowedTypes = [
       'application/pdf',
       'application/vnd.ms-excel',
